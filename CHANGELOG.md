@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.10.0]
+
+- **One-call look-up** — `resolve_source` takes `fetch_top: true` (with an optional `max_bytes`): it returns the ranked sources and the top result's content (`top_content`) in the same call, through the same sanitize and truncate steps as `fetch_docs`. If fetching the top result fails, the sources are still returned and the response says so. The `look-up` skill now uses this for docs and config questions, which saves one round-trip; it needs this binary (#59).
+- **Concurrent llms.txt probing** — the candidates on one host are probed at the same time and the result is chosen by candidate order, not by which answers first, so the choice is the same as before. Measured on one machine: resolving `fastapi` went from about 1.1 s to about 0.6 s (#57).
+- **ETag cache kept on disk** — entries with a body up to 1 MB are written to the user's Caches directory (file mode 0600) and loaded on the next start; larger bodies stay in memory. A cached body is still served only after the origin answers 304. A corrupt or unreadable cache file is ignored. Measured on one machine after a restart: `latest_version fastapi` 391 → 155 ms, `react` 321 → 73 ms (#58).
 - **Marketplace moved**: the plugin is now installed from the `claude-code-logos` marketplace (`/plugin marketplace add PsychQuantAgent/claude-code-logos`, then `/plugin install livedocs@claude-code-logos`), which includes this repository as a git submodule pinned to a release tag. This repository's own marketplace file (`livedocs-marketplace`) is removed. Existing installs switch once: `/plugin marketplace remove livedocs-marketplace`, then the two commands above. After a release, `scripts/release.sh` now prints the step that moves the submodule in `claude-code-logos` to the new tag. No change to the plugin or the binary.
 - **Repository moved**: this repository is now `PsychQuantAgent/livedocs` (was `PsychQuant/livedocs`). The wrapper's download source, the release and wiki scripts, the `.mcpb` manifest and the `User-Agent` slug name the new location; the old name redirects. Installed copies of the plugin get the wrapper change with the next release.
 
